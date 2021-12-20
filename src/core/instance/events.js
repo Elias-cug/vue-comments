@@ -45,13 +45,24 @@ export function updateComponentListeners (
   oldListeners: ?Object
 ) {
   target = vm
-  updateListeners(listeners, oldListeners || {}, add, remove, createOnceHandler, vm)
+  updateListeners(
+    listeners,
+    oldListeners || {},
+    add,
+    remove,
+    createOnceHandler,
+    vm
+  )
   target = undefined
 }
 
+// 挂载与事件相关的 4 个实例方法
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
-  Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
+  Vue.prototype.$on = function (
+    event: string | Array<string>,
+    fn: Function
+  ): Component {
     const vm: Component = this
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
@@ -79,7 +90,10 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
-  Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
+  Vue.prototype.$off = function (
+    event?: string | Array<string>,
+    fn?: Function
+  ): Component {
     const vm: Component = this
     // all
     if (!arguments.length) {
@@ -122,10 +136,14 @@ export function eventsMixin (Vue: Class<Component>) {
       if (lowerCaseEvent !== event && vm._events[lowerCaseEvent]) {
         tip(
           `Event "${lowerCaseEvent}" is emitted in component ` +
-          `${formatComponentName(vm)} but the handler is registered for "${event}". ` +
-          `Note that HTML attributes are case-insensitive and you cannot use ` +
-          `v-on to listen to camelCase events when using in-DOM templates. ` +
-          `You should probably use "${hyphenate(event)}" instead of "${event}".`
+            `${formatComponentName(
+              vm
+            )} but the handler is registered for "${event}". ` +
+            `Note that HTML attributes are case-insensitive and you cannot use ` +
+            `v-on to listen to camelCase events when using in-DOM templates. ` +
+            `You should probably use "${hyphenate(
+              event
+            )}" instead of "${event}".`
         )
       }
     }

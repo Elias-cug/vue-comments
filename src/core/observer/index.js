@@ -33,11 +33,22 @@ export function toggleObserving (value: boolean) {
  * object. Once attached, the observer converts the target
  * object's property keys into getter/setters that
  * collect dependencies and dispatch updates.
+ *
+ * Observer 类会附加到每一个被侦测的 object 上。
+ * 一旦被附加上，Observer 会将 object 的所有属性转化为 getter/setter的形式
+ * 来收集属性的依赖，并且当属性发生变化是会通知这些依赖
+ *
+ * 只要将一个 object 传到 Observer 中，那么这个 object 就会变成响应式的 object 了
+ *
+ * Data 通过 Observer 转换成了 getter/setter 的形式来追踪变化
+ * 当外界通过 Watcher 读取数据时，会触发 getter 从而将 Wathcer 添加到依赖中
+ * 当数据发生变化，会触发 setter，从而向 Dep 中的依赖 Watcher 发出通知
+ * Watcher 接受到通知后，回想外界发出通知，变化通知到法界后可能触发视图更新，或触发回调
  */
 export class Observer {
-  value: any;
-  dep: Dep;
-  vmCount: number; // number of vms that have this object as root $data
+  value: any
+  dep: Dep
+  vmCount: number // number of vms that have this object as root $data
 
   constructor (value: any) {
     this.value = value
@@ -46,8 +57,11 @@ export class Observer {
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       if (hasProto) {
+        // 将 value 原型链指向 arrayMethods
         protoAugment(value, arrayMethods)
-      } else {
+      }
+      // 如果环境不支持 __proto__ 则硬挂载
+      else {
         copyAugment(value, arrayMethods, arrayKeys)
       }
       this.observeArray(value)
@@ -60,6 +74,9 @@ export class Observer {
    * Walk through all properties and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
+   *
+   * walk 会将每一个属性都转换成 getter/setter 的形式来侦测变化
+   * 这个方法只有在数据类型为 Object 时调用
    */
   walk (obj: Object) {
     const keys = Object.keys(obj)
@@ -106,6 +123,8 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
+ *
+ * 为 value 创建一个 Observer 实例
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
@@ -131,6 +150,8 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 
 /**
  * Define a reactive property on an Object.
+ *
+ * Object的变化侦测
  */
 export function defineReactive (
   obj: Object,
@@ -139,6 +160,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 存放收集到的依赖
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -157,12 +179,14 @@ export function defineReactive (
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
+    // getter 收集依赖
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
+          // 数组的处理逻辑
           if (Array.isArray(value)) {
             dependArray(value)
           }
@@ -170,6 +194,7 @@ export function defineReactive (
       }
       return value
     },
+    // setter 触发依赖
     set: function reactiveSetter (newVal) {
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
@@ -199,10 +224,13 @@ export function defineReactive (
  * already exist.
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
-  if (process.env.NODE_ENV !== 'production' &&
+  if (
+    process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
-    warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
+    warn(
+      `Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`
+    )
   }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
@@ -215,10 +243,11 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   }
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Avoid adding reactive properties to a Vue instance or its root $data ' +
-      'at runtime - declare it upfront in the data option.'
-    )
+    process.env.NODE_ENV !== 'production' &&
+      warn(
+        'Avoid adding reactive properties to a Vue instance or its root $data ' +
+          'at runtime - declare it upfront in the data option.'
+      )
     return val
   }
   if (!ob) {
@@ -234,10 +263,13 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
  * Delete a property and trigger change if necessary.
  */
 export function del (target: Array<any> | Object, key: any) {
-  if (process.env.NODE_ENV !== 'production' &&
+  if (
+    process.env.NODE_ENV !== 'production' &&
     (isUndef(target) || isPrimitive(target))
   ) {
-    warn(`Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`)
+    warn(
+      `Cannot delete reactive property on undefined, null, or primitive value: ${(target: any)}`
+    )
   }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1)
@@ -245,10 +277,11 @@ export function del (target: Array<any> | Object, key: any) {
   }
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Avoid deleting properties on a Vue instance or its root $data ' +
-      '- just set it to null.'
-    )
+    process.env.NODE_ENV !== 'production' &&
+      warn(
+        'Avoid deleting properties on a Vue instance or its root $data ' +
+          '- just set it to null.'
+      )
     return
   }
   if (!hasOwn(target, key)) {

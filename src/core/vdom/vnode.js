@@ -1,33 +1,33 @@
 /* @flow */
 
 export default class VNode {
-  tag: string | void;
-  data: VNodeData | void;
-  children: ?Array<VNode>;
-  text: string | void;
-  elm: Node | void;
-  ns: string | void;
-  context: Component | void; // rendered in this component's scope
-  key: string | number | void;
-  componentOptions: VNodeComponentOptions | void;
-  componentInstance: Component | void; // component instance
-  parent: VNode | void; // component placeholder node
+  tag: string | void
+  data: VNodeData | void
+  children: ?Array<VNode>
+  text: string | void
+  elm: Node | void
+  ns: string | void
+  context: Component | void // rendered in this component's scope
+  key: string | number | void
+  componentOptions: VNodeComponentOptions | void
+  componentInstance: Component | void // component instance
+  parent: VNode | void // component placeholder node
 
   // strictly internal
-  raw: boolean; // contains raw HTML? (server only)
-  isStatic: boolean; // hoisted static node
-  isRootInsert: boolean; // necessary for enter transition check
-  isComment: boolean; // empty comment placeholder?
-  isCloned: boolean; // is a cloned node?
-  isOnce: boolean; // is a v-once node?
-  asyncFactory: Function | void; // async component factory function
-  asyncMeta: Object | void;
-  isAsyncPlaceholder: boolean;
-  ssrContext: Object | void;
-  fnContext: Component | void; // real context vm for functional nodes
-  fnOptions: ?ComponentOptions; // for SSR caching
-  devtoolsMeta: ?Object; // used to store functional render context for devtools
-  fnScopeId: ?string; // functional scope id support
+  raw: boolean // contains raw HTML? (server only)
+  isStatic: boolean // hoisted static node
+  isRootInsert: boolean // necessary for enter transition check
+  isComment: boolean // empty comment placeholder?
+  isCloned: boolean // is a cloned node?
+  isOnce: boolean // is a v-once node?
+  asyncFactory: Function | void // async component factory function
+  asyncMeta: Object | void
+  isAsyncPlaceholder: boolean
+  ssrContext: Object | void
+  fnContext: Component | void // real context vm for functional nodes
+  fnOptions: ?ComponentOptions // for SSR caching
+  devtoolsMeta: ?Object // used to store functional render context for devtools
+  fnScopeId: ?string // functional scope id support
 
   constructor (
     tag?: string,
@@ -39,13 +39,13 @@ export default class VNode {
     componentOptions?: VNodeComponentOptions,
     asyncFactory?: Function
   ) {
-    this.tag = tag
+    this.tag = tag // 只有元素节点有，可以用来判断是否为元素节点
     this.data = data
     this.children = children
     this.text = text
-    this.elm = elm
+    this.elm = elm // 放置真实的 dom 实例
     this.ns = undefined
-    this.context = context
+    this.context = context // 当前组件的 vue 实例
     this.fnContext = undefined
     this.fnOptions = undefined
     this.fnScopeId = undefined
@@ -56,7 +56,7 @@ export default class VNode {
     this.raw = false
     this.isStatic = false
     this.isRootInsert = true
-    this.isComment = false
+    this.isComment = false // 当 tag 不存在时判断是文本节点还是注释节点
     this.isCloned = false
     this.isOnce = false
     this.asyncFactory = asyncFactory
@@ -71,6 +71,7 @@ export default class VNode {
   }
 }
 
+// 创建注释节点
 export const createEmptyVNode = (text: string = '') => {
   const node = new VNode()
   node.text = text
@@ -78,6 +79,7 @@ export const createEmptyVNode = (text: string = '') => {
   return node
 }
 
+// 创建文本节点
 export function createTextVNode (val: string | number) {
   return new VNode(undefined, undefined, undefined, String(val))
 }
@@ -86,6 +88,8 @@ export function createTextVNode (val: string | number) {
 // used for static nodes and slot nodes because they may be reused across
 // multiple renders, cloning them avoids errors when DOM manipulations rely
 // on their elm reference.
+// 创建克隆节点
+// 目的优化静态节点和插槽节点
 export function cloneVNode (vnode: VNode): VNode {
   const cloned = new VNode(
     vnode.tag,

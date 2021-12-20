@@ -1,3 +1,67 @@
+## 文件内容说明
+存放构建后的文件
+
+### 文件说明
+1. 完整版
+
+   vue.js vue.common.js vue.esm.js
+
+2. 只包含运行时版本
+
+   vue.runtime.js vue.runtime.common.js vue.runtime.esm.js
+
+3. 完整版（生产环境）
+
+   vue.min.js
+
+4. 只包含运行时版本（生产环境）
+
+   vue.runtime.min.js
+
+### 名词介绍
+
+1. 完整版
+
+   构建后的文件同时包含编译器和运行时
+
+2. 编译器
+
+   负责将模板字符串编译成 JavaScript 渲染函数。
+
+3. 运行时
+
+  负责创建 Vue.js 实例，渲染视图和使用虚拟 DOM 实现重新渲染，基本包含除编译器外的所有部分
+
+4. UMD
+
+   UMD 版本的文件可以通过 < script > 标签直接在浏览器中使用。jsDelivr CDN提供的可以在线引入的 Vue.js 的地址（https://cdn.jsdelivr.net/npm/vue），就是运行时 + 编译器的UMD版本
+
+5. CommonJS
+
+   CommonJs 版本用来配合比较旧的打包工具，这些打包工具的默认文件置包含运行时的CommonJs版本（run.runtime.common.js）
+
+6. ES Module
+
+   ES Module 版本用来配合现代打包工具，这些打包工具的默认文件置包含运行时的ESModule版本（vue.runtime.esm.js）
+
+7. 运行时 + 编译器与只包含运行时
+
+   *.vue 文件内部的模板会在构建时使用 vue-loader 或 vueify 预编译为 JavaScript。所以最终打包完成的文件实际上时不需要编译器的，只需要引入运行时版本即可。
+
+   如果需要在客户端编译模板（比如传入一个字符串给 template 选项，或挂载到一个元素上并以其DOM内部的HTML作为模板），那么需要用到编译器，因此需要用到编译版。
+
+   ```js
+   new Vue({
+     template: '<div>需要编译器</div>'
+   })
+   ```
+
+8. 开发环境与生产环境模式
+
+   对于 UMD 版本来说，开发环境和生产环境二者的模式是硬编码的：开发环境使用未压缩的代码，生产环境使用的是压缩版本的。
+
+   对于 CommonJS 和 ESM 版本用于打包工具。
+
 ## Explanation of Build Files
 
 | | UMD | CommonJS | ES Module |

@@ -20,7 +20,7 @@ export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
   const options = vm.$options
-  const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
+  const parentVnode = (vm.$vnode = options._parentVnode) // the placeholder node in parent tree
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
@@ -39,15 +39,39 @@ export function initRender (vm: Component) {
 
   /* istanbul ignore else */
   if (process.env.NODE_ENV !== 'production') {
-    defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, () => {
-      !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
-    }, true)
-    defineReactive(vm, '$listeners', options._parentListeners || emptyObject, () => {
-      !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
-    }, true)
+    defineReactive(
+      vm,
+      '$attrs',
+      (parentData && parentData.attrs) || emptyObject,
+      () => {
+        !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)
+      },
+      true
+    )
+    defineReactive(
+      vm,
+      '$listeners',
+      options._parentListeners || emptyObject,
+      () => {
+        !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
+      },
+      true
+    )
   } else {
-    defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, null, true)
-    defineReactive(vm, '$listeners', options._parentListeners || emptyObject, null, true)
+    defineReactive(
+      vm,
+      '$attrs',
+      (parentData && parentData.attrs) || emptyObject,
+      null,
+      true
+    )
+    defineReactive(
+      vm,
+      '$listeners',
+      options._parentListeners || emptyObject,
+      null,
+      true
+    )
   }
 }
 
@@ -58,10 +82,15 @@ export function setCurrentRenderingInstance (vm: Component) {
   currentRenderingInstance = vm
 }
 
+// 这里有 $nextTick 方法
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
   installRenderHelpers(Vue.prototype)
 
+  // nextTick 接受一个回调函数作为参数
+  // 作用是将回调延迟到下次 DOM 更新周期之后再执行
+  // 它与全局方法 Vue.nextTick 一样，不同的是回调的 this 自动绑定到调用它的实例上
+  // 如果没有提供回调且在支持 Promise 的环境中，则返回一个 Promise
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }
@@ -96,7 +125,11 @@ export function renderMixin (Vue: Class<Component>) {
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production' && vm.$options.renderError) {
         try {
-          vnode = vm.$options.renderError.call(vm._renderProxy, vm.$createElement, e)
+          vnode = vm.$options.renderError.call(
+            vm._renderProxy,
+            vm.$createElement,
+            e
+          )
         } catch (e) {
           handleError(e, vm, `renderError`)
           vnode = vm._vnode
@@ -116,7 +149,7 @@ export function renderMixin (Vue: Class<Component>) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
         warn(
           'Multiple root nodes returned from render function. Render function ' +
-          'should return a single root node.',
+            'should return a single root node.',
           vm
         )
       }

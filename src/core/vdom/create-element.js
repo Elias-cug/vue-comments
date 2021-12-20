@@ -15,16 +15,14 @@ import {
   resolveAsset
 } from '../util/index'
 
-import {
-  normalizeChildren,
-  simpleNormalizeChildren
-} from './helpers/index'
+import { normalizeChildren, simpleNormalizeChildren } from './helpers/index'
 
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
+// 创建元素节点
 export function createElement (
   context: Component,
   tag: any,
@@ -52,11 +50,13 @@ export function _createElement (
   normalizationType?: number
 ): VNode | Array<VNode> {
   if (isDef(data) && isDef((data: any).__ob__)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
-      'Always create fresh vnode data objects in each render!',
-      context
-    )
+    process.env.NODE_ENV !== 'production' &&
+      warn(
+        `Avoid using observed data object as vnode data: ${JSON.stringify(
+          data
+        )}\n` + 'Always create fresh vnode data objects in each render!',
+        context
+      )
     return createEmptyVNode()
   }
   // object syntax in v-bind
@@ -68,21 +68,22 @@ export function _createElement (
     return createEmptyVNode()
   }
   // warn against non-primitive key
-  if (process.env.NODE_ENV !== 'production' &&
-    isDef(data) && isDef(data.key) && !isPrimitive(data.key)
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    isDef(data) &&
+    isDef(data.key) &&
+    !isPrimitive(data.key)
   ) {
     if (!__WEEX__ || !('@binding' in data.key)) {
       warn(
         'Avoid using non-primitive value as key, ' +
-        'use string/number value instead.',
+          'use string/number value instead.',
         context
       )
     }
   }
   // support single function children as default scoped slot
-  if (Array.isArray(children) &&
-    typeof children[0] === 'function'
-  ) {
+  if (Array.isArray(children) && typeof children[0] === 'function') {
     data = data || {}
     data.scopedSlots = { default: children[0] }
     children.length = 0
@@ -98,27 +99,36 @@ export function _createElement (
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
     if (config.isReservedTag(tag)) {
       // platform built-in elements
-      if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn) && data.tag !== 'component') {
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        isDef(data) &&
+        isDef(data.nativeOn) &&
+        data.tag !== 'component'
+      ) {
         warn(
           `The .native modifier for v-on is only valid on components but it was used on <${tag}>.`,
           context
         )
       }
       vnode = new VNode(
-        config.parsePlatformTagName(tag), data, children,
-        undefined, undefined, context
+        config.parsePlatformTagName(tag),
+        data,
+        children,
+        undefined,
+        undefined,
+        context
       )
-    } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+    } else if (
+      (!data || !data.pre) &&
+      isDef((Ctor = resolveAsset(context.$options, 'components', tag)))
+    ) {
       // component
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
-      vnode = new VNode(
-        tag, data, children,
-        undefined, undefined, context
-      )
+      vnode = new VNode(tag, data, children, undefined, undefined, context)
     }
   } else {
     // direct component options / constructor
@@ -145,8 +155,10 @@ function applyNS (vnode, ns, force) {
   if (isDef(vnode.children)) {
     for (let i = 0, l = vnode.children.length; i < l; i++) {
       const child = vnode.children[i]
-      if (isDef(child.tag) && (
-        isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))) {
+      if (
+        isDef(child.tag) &&
+        (isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))
+      ) {
         applyNS(child, ns, force)
       }
     }

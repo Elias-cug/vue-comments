@@ -53,18 +53,22 @@ export function FunctionalRenderContext (
     if (!this.$slots) {
       normalizeScopedSlots(
         data.scopedSlots,
-        this.$slots = resolveSlots(children, parent)
+        (this.$slots = resolveSlots(children, parent))
       )
     }
     return this.$slots
   }
 
-  Object.defineProperty(this, 'scopedSlots', ({
-    enumerable: true,
-    get () {
-      return normalizeScopedSlots(data.scopedSlots, this.slots())
-    }
-  }: any))
+  Object.defineProperty(
+    this,
+    'scopedSlots',
+    ({
+      enumerable: true,
+      get () {
+        return normalizeScopedSlots(data.scopedSlots, this.slots())
+      }
+    }: any)
+  )
 
   // support for compiled functional template
   if (isCompiled) {
@@ -85,12 +89,14 @@ export function FunctionalRenderContext (
       return vnode
     }
   } else {
-    this._c = (a, b, c, d) => createElement(contextVm, a, b, c, d, needNormalization)
+    this._c = (a, b, c, d) =>
+      createElement(contextVm, a, b, c, d, needNormalization)
   }
 }
 
 installRenderHelpers(FunctionalRenderContext.prototype)
 
+// 创建函数式组件
 export function createFunctionalComponent (
   Ctor: Class<Component>,
   propsData: ?Object,
@@ -121,18 +127,36 @@ export function createFunctionalComponent (
   const vnode = options.render.call(null, renderContext._c, renderContext)
 
   if (vnode instanceof VNode) {
-    return cloneAndMarkFunctionalResult(vnode, data, renderContext.parent, options, renderContext)
+    return cloneAndMarkFunctionalResult(
+      vnode,
+      data,
+      renderContext.parent,
+      options,
+      renderContext
+    )
   } else if (Array.isArray(vnode)) {
     const vnodes = normalizeChildren(vnode) || []
     const res = new Array(vnodes.length)
     for (let i = 0; i < vnodes.length; i++) {
-      res[i] = cloneAndMarkFunctionalResult(vnodes[i], data, renderContext.parent, options, renderContext)
+      res[i] = cloneAndMarkFunctionalResult(
+        vnodes[i],
+        data,
+        renderContext.parent,
+        options,
+        renderContext
+      )
     }
     return res
   }
 }
 
-function cloneAndMarkFunctionalResult (vnode, data, contextVm, options, renderContext) {
+function cloneAndMarkFunctionalResult (
+  vnode,
+  data,
+  contextVm,
+  options,
+  renderContext
+) {
   // #7817 clone node before setting fnContext, otherwise if the node is reused
   // (e.g. it was from a cached normal slot) the fnContext causes named slots
   // that should not be matched to match.
@@ -140,7 +164,8 @@ function cloneAndMarkFunctionalResult (vnode, data, contextVm, options, renderCo
   clone.fnContext = contextVm
   clone.fnOptions = options
   if (process.env.NODE_ENV !== 'production') {
-    (clone.devtoolsMeta = clone.devtoolsMeta || {}).renderContext = renderContext
+    (clone.devtoolsMeta =
+      clone.devtoolsMeta || {}).renderContext = renderContext
   }
   if (data.slot) {
     (clone.data || (clone.data = {})).slot = data.slot

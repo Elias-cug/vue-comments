@@ -23,25 +23,33 @@ let uid = 0
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
+ *
+ * 收集的依赖就是 watcher
+ * 只有 Watcher 触发的 getter 才会收集依赖，那个 Watcher 触发了 getter，就把那个 watcher 收集到Dep中
+ * 当数据发生改变时，会循环依赖列表，把所有的 watcher 都通知一遍
+ * watcher 的原理就是先把自己设置到全局唯一的指定位置（类如 window.target），然后读取数据。
+ * 因为读取了数据就会触发这个数据的 getter。
+ * 接着，在 getter 中就会从全局唯一的那个位置读取当前正在读取数据的 watcher，并把这个watcher收集到Dep中。
+ * 通过这样的方式 Watcher 可以主动去订阅任意一个数据的变化
  */
 export default class Watcher {
-  vm: Component;
-  expression: string;
-  cb: Function;
-  id: number;
-  deep: boolean;
-  user: boolean;
-  lazy: boolean;
-  sync: boolean;
-  dirty: boolean;
-  active: boolean;
-  deps: Array<Dep>;
-  newDeps: Array<Dep>;
-  depIds: SimpleSet;
-  newDepIds: SimpleSet;
-  before: ?Function;
-  getter: Function;
-  value: any;
+  vm: Component
+  expression: string
+  cb: Function
+  id: number
+  deep: boolean
+  user: boolean
+  lazy: boolean
+  sync: boolean
+  dirty: boolean
+  active: boolean
+  deps: Array<Dep>
+  newDeps: Array<Dep>
+  depIds: SimpleSet
+  newDepIds: SimpleSet
+  before: ?Function
+  getter: Function
+  value: any
 
   constructor (
     vm: Component,
@@ -73,9 +81,8 @@ export default class Watcher {
     this.newDeps = []
     this.depIds = new Set()
     this.newDepIds = new Set()
-    this.expression = process.env.NODE_ENV !== 'production'
-      ? expOrFn.toString()
-      : ''
+    this.expression =
+      process.env.NODE_ENV !== 'production' ? expOrFn.toString() : ''
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
@@ -83,17 +90,16 @@ export default class Watcher {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
-        process.env.NODE_ENV !== 'production' && warn(
-          `Failed watching path: "${expOrFn}" ` +
-          'Watcher only accepts simple dot-delimited paths. ' +
-          'For full control, use a function instead.',
-          vm
-        )
+        process.env.NODE_ENV !== 'production' &&
+          warn(
+            `Failed watching path: "${expOrFn}" ` +
+              'Watcher only accepts simple dot-delimited paths. ' +
+              'For full control, use a function instead.',
+            vm
+          )
       }
     }
-    this.value = this.lazy
-      ? undefined
-      : this.get()
+    this.value = this.lazy ? undefined : this.get()
   }
 
   /**
@@ -193,7 +199,13 @@ export default class Watcher {
         this.value = value
         if (this.user) {
           const info = `callback for watcher "${this.expression}"`
-          invokeWithErrorHandling(this.cb, this.vm, [value, oldValue], this.vm, info)
+          invokeWithErrorHandling(
+            this.cb,
+            this.vm,
+            [value, oldValue],
+            this.vm,
+            info
+          )
         } else {
           this.cb.call(this.vm, value, oldValue)
         }
