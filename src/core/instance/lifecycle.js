@@ -29,6 +29,9 @@ export function setActiveInstance (vm: Component) {
   }
 }
 
+// 初始化实例属性
+// 需要实例化的属性既有 Vue.js 内部需要用到的属性，
+// 也有提供给内部使用的属性（以$开头提供用户使用）
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
@@ -38,12 +41,16 @@ export function initLifecycle (vm: Component) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
+
+    // 将当前实例添加到父组件实例的$children中
     parent.$children.push(vm)
   }
 
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
+  // 当前实例的直接子组件
+  // 值是从子组件直接添加到父组件的
   vm.$children = []
   vm.$refs = {}
 

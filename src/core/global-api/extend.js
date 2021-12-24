@@ -15,6 +15,8 @@ export function initExtend (Vue: GlobalAPI) {
 
   /**
    * Class inheritance
+   *
+   * 作用：创建一个子类
    */
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
@@ -36,10 +38,7 @@ export function initExtend (Vue: GlobalAPI) {
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
-    Sub.options = mergeOptions(
-      Super.options,
-      extendOptions
-    )
+    Sub.options = mergeOptions(Super.options, extendOptions)
     Sub['super'] = Super
 
     // For props and computed properties, we define the proxy getters on

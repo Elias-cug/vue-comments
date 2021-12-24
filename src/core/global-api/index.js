@@ -41,12 +41,24 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     defineReactive
   }
 
+  // 同 vm.$set
+  // 注意不能是 Vue.js 实例或者 Vue.js 实例的跟数据对象
   Vue.set = set
+
+  // 同 vm.$set
   Vue.delete = del
+
+  //
+  // 作用：在下次 DOM 更新循环结束之后执行延迟回调，修改数据之后立即使用这个方法获取更新后的DOM
   Vue.nextTick = nextTick
 
   // 2.6 explicit observable API
-  Vue.observable = <T>(obj: T): T => {
+  // Vue.observable = <T>(obj: T): T => {
+  //   observe(obj)
+  //   return obj
+  // }
+
+  Vue.observable = obj => {
     observe(obj)
     return obj
   }

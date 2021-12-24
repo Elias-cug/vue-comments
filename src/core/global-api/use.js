@@ -2,9 +2,11 @@
 
 import { toArray } from '../util/index'
 
+// 用于安装 Vue.js 插件
 export function initUse (Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | Object) {
-    const installedPlugins = (this._installedPlugins || (this._installedPlugins = []))
+    const installedPlugins =
+      this._installedPlugins || (this._installedPlugins = [])
     if (installedPlugins.indexOf(plugin) > -1) {
       return this
     }

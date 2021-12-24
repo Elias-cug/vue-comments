@@ -47,8 +47,16 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 }
 
 export function initState (vm: Component) {
+  // 保存当前组件中所有的 watcher 实例。
+  // 无论使用 vm.$watch() 注册的 watcher 实例还是使用 watch 选项添加的 watcher 实例
+  //  都会添加到 vm._watchers 中
+  // 可以通过 vm._watchers 得到当前 Vue.js 实例中注册的所有 watcher 实例
+  //  并将他们依次卸载
+
+  // 顺序 props --> methods --> data --> computed --> watch
   vm._watchers = []
   const opts = vm.$options
+
   if (opts.props) initProps(vm, opts.props)
   if (opts.methods) initMethods(vm, opts.methods)
   if (opts.data) {
@@ -62,6 +70,9 @@ export function initState (vm: Component) {
   }
 }
 
+// 原理： 父组件提供数据，子组件通过 props 字段选择自己需要那些内容，
+//        Vue.js 内部通过子组件的 props 选项将需要的数据筛选出来之后
+//        添加到子组件的上下文中
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = (vm._props = {})
@@ -112,6 +123,9 @@ function initProps (vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
+// 1. data 中的数据最终会保存到 vm._data 中。
+// 2. 然后在 vm 上设置一个代理
+// 3. 需要调用 observe 将 data 转换成响应式的
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function' ? getData(data, vm) : data || {}
@@ -166,6 +180,10 @@ export function getData (data: Function, vm: Component): any {
 
 const computedWatcherOptions = { lazy: true }
 
+// computed 是定义在 vm 上的一个特殊的 getter 方法
+// 之所以说特殊，是因为在 vm 上定义 getter 方法时，
+// get 并不是用户提供的函数，而是 Vue.js 内部的一个代理函数
+// 在代理函数中可以结合 Watcher 实现缓存与收集依赖等功能
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
   const watchers = (vm._computedWatchers = Object.create(null))
@@ -263,6 +281,7 @@ function createGetterInvoker (fn) {
   }
 }
 
+// 只需要循环选项中的 methods 对象，并将每个属性一次挂载到 vm 上即可
 function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {

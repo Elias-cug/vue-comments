@@ -9,6 +9,9 @@ import {
 } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
 
+// 初始化事件是指将父组件在模板中使用的 v-on 注册的事件添加到子组件的事件系统
+// 如果 v-on 写在组件标签上，那么这个事件会被注册到子组件的 Vue.js 事件系统中
+// 如果写在平台标签上，如 div 那么事件会被注册到浏览器事件中
 export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   vm._hasHookEvent = false
